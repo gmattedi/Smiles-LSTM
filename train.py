@@ -15,7 +15,7 @@ def train(
         net: model.CharRNN, data: Sequence[int],
         epochs: int=1, batch_size: int=32,
         seq_length: int=100, lr: float=0.001, clip: int=5,
-        val_frac: float=0.1, print_every: int=10000) -> List[List[float,float]]:
+        val_frac: float=0.1, print_every: int=10000) -> List[List[float]]:
     """
     Train the network
     Args:
@@ -107,7 +107,7 @@ def train(
 
                     val_losses.append(val_loss.item())
 
-                net.train()  # reset to train mode after iterationg through validation data
+                net.train()  # reset to train mode after iteration through validation data
 
                 timer_end = time.time()
                 loss_hist.append([loss.item(), np.mean(val_losses)])
