@@ -7,3 +7,6 @@ With fine-tuning
 
 Draws from this [GitHub repo](https://github.com/bayeslabs/genmol/tree/Sunita/genmol)
 and the associated [Medium post](https://medium.com/@sunitachoudhary103/generating-molecules-using-a-char-rnn-in-pytorch-16885fd9394b)
+
+
+**WORK IN PROGRESS**
