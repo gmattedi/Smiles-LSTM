@@ -73,6 +73,7 @@ def get_sample(net: model.CharRNN, size: int, prime: str = 'B', top_k: Optional[
         top_k (Optional[int]): Pick form top K characters
 
     Returns:
+        chars (str): Characters
 
     """
     # Check if GPU is available

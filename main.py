@@ -55,7 +55,7 @@ sample_prior.drop(columns=['ROMol']).to_csv('output/Smiles-LSTM_ChEMBL28_prior.c
 # --------------- FINE TUNING -----------------------------
 # Setup model
 net = model.CharRNN(chars, n_hidden=config['n_hidden'], n_layers=config['n_layers'])
-net.load_state_dict(torch.load('Smiles-LSTM_ChEMBL28_prior.pt'))
+net.load_state_dict(torch.load('output/Smiles-LSTM_ChEMBL28_prior.pt', map_location=torch.device(device)))
 print(net)
 
 # Load training data
