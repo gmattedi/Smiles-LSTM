@@ -1,7 +1,16 @@
+import logging
 from typing import Sequence
 
 import numpy as np
 from rdkit.Chem import Descriptors, rdMolDescriptors
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
+
+logger = logging.getLogger('main')
+
 
 # Hardcode chars for consistency
 chars = (
