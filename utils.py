@@ -11,7 +11,6 @@ logging.basicConfig(
 
 logger = logging.getLogger('main')
 
-
 # Hardcode chars for consistency
 chars = (
     '9', '1', 'B', 'p', 'X', '3', 'i', '6', '/', 'l', '7', 'S', '(', 'N',

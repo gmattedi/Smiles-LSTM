@@ -1,6 +1,7 @@
+from typing import Sequence
+
 import torch
 from torch import nn
-from typing import Sequence
 
 
 # Declaring the model
@@ -9,8 +10,8 @@ class CharRNN(nn.Module):
     CharRNN
     """
 
-    def __init__(self, tokens: Sequence[int], n_hidden: int=10, n_layers: int=2,
-                 drop_prob: float=0.2, lr: float=0.001):
+    def __init__(self, tokens: Sequence[int], n_hidden: int = 10, n_layers: int = 2,
+                 drop_prob: float = 0.2, lr: float = 0.001):
         """
         Init model
 

@@ -1,12 +1,13 @@
 from typing import Optional, Tuple
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
 from rdkit import RDLogger, Chem
 
 import model
-from utils import *
+import utils
 
 RDLogger.DisableLog('rdApp.*')
 
@@ -31,7 +32,7 @@ def predict(
 
     # tensor inputs
     x = np.array([[net.char2int[char]]])
-    x = one_hot_encode(x, len(net.chars))
+    x = utils.one_hot_encode(x, len(net.chars))
     inputs = torch.from_numpy(x)
     train_on_gpu = torch.cuda.is_available()
     if train_on_gpu:
@@ -132,8 +133,8 @@ def get_sample_frame(net: model.CharRNN, size: int, prime: str = 'B', top_k: Opt
         print(f'Valid molecules {num_valid}/{num_valid + num_invalid}')
 
     # Compute descriptors of samples
-    for desc in descriptors:
-        sample[desc] = sample.ROMol.map(descriptors[desc])
+    for desc in utils.descriptors:
+        sample[desc] = sample.ROMol.map(utils.descriptors[desc])
 
     return sample
 
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     train_on_gpu = torch.cuda.is_available()
     device = 'cuda' if train_on_gpu else 'cpu'
 
-    net = model.CharRNN(chars, n_hidden=args.hidden, n_layers=args.layers)
+    net = model.CharRNN(utils.chars, n_hidden=args.hidden, n_layers=args.layers)
     net.load_state_dict(torch.load(args.model, map_location=torch.device(device)))
 
     net_sample = get_sample_frame(net, size=args.size, verbose=False)

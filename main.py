@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import torch
 
@@ -5,7 +6,6 @@ import model
 import sample
 import train
 import utils
-from utils import *
 
 logger = utils.logger
 
@@ -29,8 +29,8 @@ logger.info(f'Config {config}')
 
 # --------------- PRIOR MODEL -----------------------------
 # Setup model
-logger.info('Creating the model')
-net = model.CharRNN(chars, n_hidden=config['n_hidden'], n_layers=config['n_layers'])
+logger.info('Instantiating the model')
+net = model.CharRNN(utils.chars, n_hidden=config['n_hidden'], n_layers=config['n_layers'])
 logger.info(net)
 
 # Load training data
@@ -40,7 +40,7 @@ chemreps = chemreps[chemreps.canonical_smiles.str.len() <= 100]
 
 # Encode the text
 text = '\n'.join(chemreps.canonical_smiles.values)
-encoded = np.array([char2int[ch] for ch in text])
+encoded = np.array([utils.char2int[ch] for ch in text])
 
 # Train
 logger.info('Training')
@@ -66,7 +66,7 @@ sample_prior.drop(columns=['ROMol']).to_csv('output/Smiles-LSTM_ChEMBL28_prior.c
 # --------------- FINE TUNING -----------------------------
 # Setup model
 logger.info('Reloading the unbiased model for finetuning')
-net = model.CharRNN(chars, n_hidden=config['n_hidden'], n_layers=config['n_layers'])
+net = model.CharRNN(utils.chars, n_hidden=config['n_hidden'], n_layers=config['n_layers'])
 net.load_state_dict(torch.load('output/Smiles-LSTM_ChEMBL28_prior.pt', map_location=torch.device(device)))
 print(net)
 
@@ -77,7 +77,7 @@ data = data[data['pChEMBL Value'] >= 7]
 
 # Encode the text
 actives = '\n'.join(data.Smiles)
-encoded = np.array([char2int[ch] for ch in actives])
+encoded = np.array([utils.char2int[ch] for ch in actives])
 
 # Train
 logger.info('Finetuning')

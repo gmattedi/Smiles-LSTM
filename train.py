@@ -1,21 +1,23 @@
 import time
+from typing import Sequence, List
 
+import numpy as np
 import torch
+from sklearn.model_selection import train_test_split
 from torch import nn
 
 import model
-from utils import *
+import utils
 
-from typing import Sequence, List
-from sklearn.model_selection import train_test_split
+logger = utils.logger
 
 
 # Declaring the train method
 def train(
         net: model.CharRNN, data: Sequence[int],
-        epochs: int=1, batch_size: int=32,
-        seq_length: int=100, lr: float=0.001, clip: int=5,
-        val_frac: float=0.1, print_every: int=10000) -> List[List[float]]:
+        epochs: int = 1, batch_size: int = 32,
+        seq_length: int = 100, lr: float = 0.001, clip: int = 5,
+        val_frac: float = 0.1, print_every: int = 10000) -> List[List[float]]:
     """
     Train the network
     Args:
@@ -56,11 +58,11 @@ def train(
         h = net.init_hidden(batch_size)
 
         timer_start = time.time()
-        for x, y in get_batches(data, batch_size, seq_length):
+        for x, y in utils.get_batches(data, batch_size, seq_length):
             counter += 1
 
             # One-hot encode our data and make them Torch tensors
-            x = one_hot_encode(x, n_chars)
+            x = utils.one_hot_encode(x, n_chars)
             inputs, targets = torch.from_numpy(x), torch.from_numpy(y)
 
             if train_on_gpu:
@@ -89,9 +91,9 @@ def train(
                 val_h = net.init_hidden(batch_size)
                 val_losses = []
                 net.eval()
-                for xval, yval in get_batches(val_data, batch_size, seq_length):
+                for xval, yval in utils.get_batches(val_data, batch_size, seq_length):
                     # One-hot encode our data and make them Torch tensors
-                    xval = one_hot_encode(xval, n_chars)
+                    xval = utils.one_hot_encode(xval, n_chars)
                     xval, yval = torch.from_numpy(xval), torch.from_numpy(yval)
 
                     # Creating new variables for the hidden state, otherwise
@@ -112,10 +114,14 @@ def train(
                 timer_end = time.time()
                 loss_hist.append([loss.item(), np.mean(val_losses)])
 
-                print("Epoch: {}/{}...".format(e + 1, epochs),
-                      "Step: {:8d}...".format(counter),
-                      "Loss: {:8.4f}...".format(loss.item()),
-                      "Val Loss: {:8.4f}".format(np.mean(val_losses)),
-                      "Epoch Time {:8.1f}s".format(timer_end - timer_start))
+                msg = \
+                    f"""
+Epoch: {e + 1}/{epochs}
+Step:  {counter:8d}
+Loss:  {loss.item():8.4f}
+Val loss: {np.mean(val_losses):8.4f}
+Epoch time: {timer_end - timer_start:8.1f}s
+"""
+                logger.info(msg)
 
     return loss_hist
