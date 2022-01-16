@@ -4,7 +4,7 @@ import torch
 
 import model
 import sample
-import train
+import train2
 import utils
 
 logger = utils.logger
@@ -21,7 +21,7 @@ config = {
     'n_layers': 2,
     'batch_size': 32,
     'seq_length': 50,
-    'n_epochs': 10,
+    'n_epochs': 1,
     'n_epochs_finetune': 50,
     'lr': 0.001
 }
@@ -44,7 +44,7 @@ encoded = np.array([utils.char2int[ch] for ch in text])
 
 # Train
 logger.info('Training')
-train.train(
+train2.train(
     net, encoded,
     epochs=config['n_epochs'],
     batch_size=config['batch_size'],
@@ -72,7 +72,7 @@ print(net)
 
 # Load training data
 logger.info('Loading and processing input data for finetuning')
-data = pd.read_csv('input/chembl-adora2a-ic50-ki/ChEMBL_ADORA2a_IC50-Ki.csv')
+data = pd.read_csv('input/ChEMBL_ADORA2a_IC50-Ki.csv.gz')
 data = data[data['pChEMBL Value'] >= 7]
 
 # Encode the text
@@ -81,7 +81,7 @@ encoded = np.array([utils.char2int[ch] for ch in actives])
 
 # Train
 logger.info('Finetuning')
-train.train(
+train2.train(
     net, encoded,
     epochs=config['n_epochs_finetune'],
     batch_size=config['batch_size'],
