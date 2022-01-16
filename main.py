@@ -4,7 +4,7 @@ import torch
 
 import model
 import sample
-import train2
+import train
 import utils
 
 logger = utils.logger
@@ -44,7 +44,7 @@ encoded = np.array([utils.char2int[ch] for ch in text])
 
 # Train
 logger.info('Training')
-train2.train(
+train.train(
     net, encoded,
     epochs=config['n_epochs'],
     batch_size=config['batch_size'],
@@ -81,7 +81,7 @@ encoded = np.array([utils.char2int[ch] for ch in actives])
 
 # Train
 logger.info('Finetuning')
-train2.train(
+train.train(
     net, encoded,
     epochs=config['n_epochs_finetune'],
     batch_size=config['batch_size'],
