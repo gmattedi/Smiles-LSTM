@@ -17,11 +17,11 @@ logger.info(f'Running on {device}')
 
 # --------------- SETUP -----------------------------
 config = {
-    'n_hidden': 56,
-    'n_layers': 2,
-    'batch_size': 32,
+    'n_hidden': 128,
+    'n_layers': 4,
+    'batch_size': 128,
     'seq_length': 50,
-    'n_epochs': 10,
+    'n_epochs': 25,
     'n_epochs_finetune': 50,
     'lr': 0.001
 }
@@ -44,7 +44,7 @@ encoded = np.array([utils.char2int[ch] for ch in text])
 
 # Train
 logger.info('Training')
-train.train(
+train_info = train.train(
     net, encoded,
     epochs=config['n_epochs'],
     batch_size=config['batch_size'],
@@ -52,6 +52,8 @@ train.train(
     lr=config['lr'],
     print_every=10000
 )
+train_info = pd.DataFrame(train_info, columns=['epoch','step','train_loss','val_loss'])
+train_info.to_csv('output/Smiles-LSTM_ChEMBL28_prior_info.csv', index=False)
 
 # Sample model
 logger.info('Sampling the unbiased model')
@@ -81,7 +83,7 @@ encoded = np.array([utils.char2int[ch] for ch in actives])
 
 # Train
 logger.info('Finetuning')
-train.train(
+train_info = train.train(
     net, encoded,
     epochs=config['n_epochs_finetune'],
     batch_size=config['batch_size'],
@@ -89,6 +91,8 @@ train.train(
     lr=config['lr'],
     print_every=10000
 )
+train_info = pd.DataFrame(train_info, columns=['epoch','step','train_loss','val_loss'])
+train_info.to_csv('output/Smiles-LSTM_ChEMBL28_finetune_info.csv', index=False)
 
 # Sample model
 logger.info('Sampling the finetuned model')
@@ -98,7 +102,7 @@ sample_ft['set'] = 'finetune'
 # Save prior model and sample output
 logger.info('Saving the finetuned model and its sample output')
 torch.save(net.state_dict(), 'output/Smiles-LSTM_ChEMBL28_finetune.pt')
-sample_prior.drop(columns=['ROMol']).to_csv('output/Smiles-LSTM_ChEMBL28_finetune.csv')
+sample_ft.drop(columns=['ROMol']).to_csv('output/Smiles-LSTM_ChEMBL28_finetune.csv')
 
 # Combine samples from prior and fine-tuned model and save
 sample_both = pd.concat([sample_prior, sample_ft])

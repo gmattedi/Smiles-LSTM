@@ -125,10 +125,11 @@ def get_sample_frame(net: model.CharRNN, size: int, prime: str = 'B', top_k: Opt
     sample = get_sample(net, size=size, prime=prime, top_k=top_k).split('\n')
     sample = pd.DataFrame(sample, columns=['SMILES'])
     sample['ROMol'] = sample.SMILES.map(Chem.MolFromSmiles)
-    sample = sample[sample.ROMol.notna()]
 
     num_valid = sample.ROMol.notna().sum()
     num_invalid = sample.shape[0] - num_valid
+    sample = sample[sample.ROMol.notna()]
+
     if verbose:
         print(f'Valid molecules {num_valid}/{num_valid + num_invalid}')
 
