@@ -108,7 +108,7 @@ def get_sample_frame(net: model.CharRNN, size: int, prime: str = 'B', top_k: Opt
                      verbose: bool = True) -> pd.DataFrame:
     """
     Wrapper for sampling the net, splitting the output into SMILES string, converting to
-    RDKit mols, checking validty, and computing descriptors
+    RDKit mols, checking validity, and computing descriptors
 
     Args:
         net (model.CharRNN)

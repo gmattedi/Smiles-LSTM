@@ -52,7 +52,7 @@ train_info = train.train(
     lr=config['lr'],
     print_every=10000
 )
-train_info = pd.DataFrame(train_info, columns=['epoch','step','train_loss','val_loss'])
+train_info = pd.DataFrame(train_info, columns=['epoch', 'step', 'train_loss', 'val_loss'])
 train_info.to_csv('output/Smiles-LSTM_ChEMBL28_prior_info.csv', index=False)
 
 # Sample model
@@ -91,7 +91,7 @@ train_info = train.train(
     lr=config['lr'],
     print_every=10000
 )
-train_info = pd.DataFrame(train_info, columns=['epoch','step','train_loss','val_loss'])
+train_info = pd.DataFrame(train_info, columns=['epoch', 'step', 'train_loss', 'val_loss'])
 train_info.to_csv('output/Smiles-LSTM_ChEMBL28_finetune_info.csv', index=False)
 
 # Sample model
