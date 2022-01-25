@@ -21,7 +21,7 @@ config = {
     'n_layers': 4,
     'batch_size': 128,
     'seq_length': 50,
-    'n_epochs': 25,
+    'n_epochs': 100,
     'n_epochs_finetune': 50,
     'lr': 0.001
 }
