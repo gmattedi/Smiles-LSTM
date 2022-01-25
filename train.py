@@ -1,9 +1,8 @@
 import time
-from typing import Sequence, List, Optional
+from typing import List
 
 import numpy as np
 import torch
-from sklearn.model_selection import train_test_split
 from torch import nn
 
 import model
@@ -14,7 +13,7 @@ logger = utils.logger
 
 # Declaring the train method
 def train(
-        net: model.CharRNN, data: Sequence[int],
+        net: model.CharRNN, data: np.ndarray,
         epochs: int = 1, batch_size: int = 32,
         seq_length: int = 100, lr: float = 0.001, clip: int = 5,
         val_frac: float = 0.1, print_every: int = 10000) -> List[List[float]]:
@@ -22,7 +21,7 @@ def train(
     Train the network
     Args:
         net (model.CharRNN):
-        data (Sequence[int]): Flat one-hot SMILES encoding
+        data (np.ndarray): Flat one-hot SMILES encoding (array of ints)
         epochs (int): Number of epochs
         batch_size (int)
         seq_length (int): Number of character steps per mini-batch
@@ -43,7 +42,7 @@ def train(
     criterion = nn.CrossEntropyLoss()
 
     # create training and validation data
-    val_idx = int(len(data)*(1-val_frac))
+    val_idx = int(len(data) * (1 - val_frac))
     data, val_data = data[:val_idx], data[val_idx:]
 
     # Check if GPU is available
@@ -68,7 +67,7 @@ def train(
             x = utils.one_hot_encode(x, n_chars)
             inputs, targets = torch.from_numpy(x), torch.from_numpy(y)
 
-            if(train_on_gpu):
+            if train_on_gpu:
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             # Creating new variables for the hidden state, otherwise
@@ -83,7 +82,7 @@ def train(
 
             # calculate the loss and perform backprop
             loss = criterion(output, targets.view(
-                batch_size*seq_length).long())
+                batch_size * seq_length).long())
             loss.backward()
             # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
             nn.utils.clip_grad_norm_(net.parameters(), clip)
@@ -104,20 +103,20 @@ def train(
                     val_h = tuple([each.data for each in val_h])
 
                     inputs, targets = x, y
-                    if(train_on_gpu):
+                    if train_on_gpu:
                         inputs, targets = inputs.cuda(), targets.cuda()
 
                     output, val_h = net(inputs, val_h)
                     val_loss = criterion(output, targets.view(
-                        batch_size*seq_length).long())
+                        batch_size * seq_length).long())
 
                     val_losses.append(val_loss.item())
 
-                net.train()  # reset to train mode after iterationg through validation data
+                net.train()  # reset to train mode after iteration through validation data
                 timer_end = time.time()
 
                 train_loss, val_loss = loss.item(), np.mean(val_losses)
-                loss_hist.append([e+1, counter, train_loss, val_loss])
+                loss_hist.append([e + 1, counter, train_loss, val_loss])
 
                 msg = \
                     f"""

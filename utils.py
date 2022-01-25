@@ -33,11 +33,11 @@ descriptors = {
 }
 
 
-def one_hot_encode(arr: Sequence[Sequence[int]], n_labels: int) -> np.ndarray:
+def one_hot_encode(arr: np.ndarray, n_labels: int) -> np.ndarray:
     """
     Convert dense one-hot representation to matrix.
     Args:
-        arr (Sequence[int]): Sequence of dense one-hot embedding
+        arr (np.ndarray): Array of dense one-hot embedding
         n_labels (int): Total number of possible labels
 
     Returns:
