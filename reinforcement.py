@@ -11,9 +11,6 @@ import model
 import sample
 import utils
 
-train_on_gpu = torch.cuda.is_available()
-device = 'cuda' if train_on_gpu else 'cpu'
-
 
 def sigmoid(x, x0: float = 0., b: float = 1.):
     return 1 / (1 + np.exp(-b * (x - x0)))
@@ -39,7 +36,7 @@ class Reinforcement:
 
         self.net = net
         self.train_on_gpu = torch.cuda.is_available()
-        self.device = 'cuda' if train_on_gpu else 'cpu'
+        self.device = 'cuda' if self.train_on_gpu else 'cpu'
 
         self.gamma = gamma
         self.scorer = scorer
@@ -65,7 +62,7 @@ class Reinforcement:
 
         """
 
-        rl_loss = Tensor([0])
+        rl_loss = Tensor([0], device=self.device)
         total_reward = 0
 
         # Sample N episodes from the net
