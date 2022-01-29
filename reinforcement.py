@@ -1,11 +1,12 @@
+import time
 from typing import Optional, List, Tuple, Callable
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch import Tensor
 from rdkit import Chem
 from rdkit.Chem import Descriptors
+from torch import Tensor
 
 import model
 import sample
@@ -25,13 +26,13 @@ class Reinforcement:
     def __init__(self, net: model.CharRNN, scorer: Callable[[Chem.Mol], float], gamma: float = 0.97, lr: float = 0.001):
         """
         Init Policy Gradient instance
-        
+
         Args:
-            net (CharRNN) 
+            net (CharRNN)
             scorer (Callable[[Chem.Mol], float]): function or method that takes
-                a RDKit molecule and returns a real score 
-            gamma (float): discount factor 
-            lr (float): Optimizer learning rate 
+                a RDKit molecule and returns a real score
+            gamma (float): discount factor
+            lr (float): Optimizer learning rate
         """
 
         self.net = net
@@ -48,13 +49,53 @@ class Reinforcement:
         # Not the most elegant solution.
         self.avg_episode_length = 50  # 48.9
 
-    def gradient(self, batch_size: int, clip: Optional[float] = None) -> Tuple[float, Tensor]:
+    def train(self, num_batches: int = 25, batch_size: int = 24, clip: Optional[float] = None, log_every: int = 1) -> \
+    Tuple[
+        List[float], List[float]]:
+        """
+        Policy gradient optimisation
+
+        Args:
+            num_batches (int)
+            batch_size (int): Number of episodes per batch
+            clip (Optional[float]): Clip gradient
+            log_every (int): Log every N batches
+
+        Returns:
+            history_reward (List[float])
+            history_loss (List[float])
+
+        """
+
+        history_reward, history_loss = [], []
+
+        timer_start = time.time()
+        for i in range(num_batches):
+            total_reward, rl_loss = self.gradient(batch_size=batch_size, clip=clip)
+
+            history_reward.append(total_reward)
+            history_loss.append(rl_loss)
+
+            timer_elapsed = time.time() - timer_start
+
+            if i % log_every == 0:
+                msg = f"""
+Batch: {i + 1} / {num_batches}
+Total Reward: {total_reward:8.4g}
+RL loss: {rl_loss:8.4g}
+Elapsed: {timer_elapsed:8.1f}s
+"""
+                utils.logger.info(msg)
+
+        return history_reward, history_loss
+
+    def gradient(self, batch_size: int, clip: Optional[float] = None) -> Tuple[float, float]:
         """
         Sample a batch of episodes (SMILES strings), score them and apply the policy gradient
-        
+
         Args:
-            batch_size (int): Number of episodes
-            clip (Optiona[float]): Clip gradients 
+            batch_size (int): Maximum number of episodes
+            clip (Optiona[float]): Clip gradients
 
         Returns:
             total_reward: float
@@ -62,7 +103,7 @@ class Reinforcement:
 
         """
 
-        rl_loss = Tensor([0], device=self.device)
+        rl_loss = Tensor([0]).to(device=self.device)
         total_reward = 0
 
         # Sample N episodes from the net
@@ -118,12 +159,12 @@ class Reinforcement:
         """
         Get batch of episodes from the net
         Args:
-            size (int): Number of characters to sample 
-            prime (str): Prime the net with a character 
+            size (int): Number of characters to sample
+            prime (str): Prime the net with a character
 
         Returns:
             batch (List[str]): list of episodes
-            
+
         """
 
         batch = sample.get_sample(self.net, size=size, prime=prime)
@@ -139,15 +180,15 @@ class Reinforcement:
         """
         Given a character and hidden state, return the probabilities of each action
         and the new hidden state)
-        
+
         Args:
-            char (str) 
-            h (Tuple[Tensor, Tensor]): hidden state 
-            log (bool): Return log softmax values instead of softmax 
+            char (str)
+            h (Tuple[Tensor, Tensor]): hidden state
+            log (bool): Return log softmax values instead of softmax
 
         Returns:
             p (Tensor): probabilities of the next h
-            h (Tuple[Tensor, Tensor]): new hidden state 
+            h (Tuple[Tensor, Tensor]): new hidden state
 
         """
 
@@ -156,7 +197,7 @@ class Reinforcement:
         x = utils.one_hot_encode(x, len(self.net.chars))
         inputs = torch.from_numpy(x)
 
-        if train_on_gpu:
+        if self.train_on_gpu:
             inputs = inputs.cuda()
 
         # detach hidden state from history
@@ -176,7 +217,7 @@ class Reinforcement:
     def logp_scorer(mol: Chem.Mol, scale: float = 1e-6, sigmoid_x0: float = 3., sigmoid_b: float = 1.) -> float:
         """
         Simple scorer that returns the sigmoid of the cLogP
-        
+
         Args:
             mol (Chem.Mol): RDKit molecule 
             scale (float): Scale the score by a factor

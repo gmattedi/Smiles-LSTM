@@ -16,7 +16,7 @@ def train(
         net: model.CharRNN, data: np.ndarray,
         epochs: int = 1, batch_size: int = 32,
         seq_length: int = 100, lr: float = 0.001, clip: int = 5,
-        val_frac: float = 0.1, print_every: int = 10000) -> List[List[float]]:
+        val_frac: float = 0.1, log_every: int = 10000) -> List[List[float]]:
     """
     Train the network
     Args:
@@ -28,10 +28,10 @@ def train(
         lr (float)
         clip (float): Clip gradients
         val_frac (float)
-        print_every (int): Print info every N samples
+        log_every (int): Print info every N samples
 
     Returns:
-        loss_hist (List[List[float,float,float,float]]): Loss history for every `print_every`.
+        loss_hist (List[List[float,float,float,float]]): Loss history for every `log_every`.
             columns are epoch, step, training loss and validation loss
 
     """
@@ -88,7 +88,7 @@ def train(
             nn.utils.clip_grad_norm_(net.parameters(), clip)
             opt.step()
             # loss stats
-            if counter % print_every == 0:
+            if counter % log_every == 0:
                 # Get validation loss
                 val_h = net.init_hidden(batch_size)
                 val_losses = []
