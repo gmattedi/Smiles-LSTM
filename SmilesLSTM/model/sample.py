@@ -6,8 +6,7 @@ import torch
 import torch.nn.functional as F
 from rdkit import RDLogger, Chem
 
-import model
-import utils
+from SmilesLSTM.model import model, utils
 
 RDLogger.DisableLog('rdApp.*')
 

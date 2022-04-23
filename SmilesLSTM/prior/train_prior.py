@@ -1,13 +1,10 @@
+import json
+
 import numpy as np
 import pandas as pd
 import torch
 
-import model
-import sample
-import train
-import utils
-
-import json
+from SmilesLSTM.model import model, sample, train, utils
 
 logger = utils.logger
 
@@ -18,7 +15,7 @@ device = 'cuda' if train_on_gpu else 'cpu'
 logger.info(f'Running on {device}')
 
 # --------------- SETUP -----------------------------
-with open('../net_config.json') as handle:
+with open(utils.MODULE_PATH + '/net_config.json') as handle:
     config = json.load(handle)
 logger.info(f'Config {config}')
 
@@ -30,7 +27,7 @@ logger.info(net)
 
 # Load training data
 logger.info('Loading and processing input data')
-chemreps = pd.read_csv("../input/chembl_28_chemreps.csv.gz")
+chemreps = pd.read_csv(utils.MODULE_PATH + '/input/chembl_28_chemreps.csv.gz')
 chemreps = chemreps[chemreps.canonical_smiles.str.len() <= 100]
 
 # Encode the text
@@ -48,7 +45,7 @@ train_info = train.train(
     log_every=10000
 )
 train_info = pd.DataFrame(train_info, columns=['epoch', 'step', 'train_loss', 'val_loss'])
-train_info.to_csv('Smiles-LSTM_ChEMBL28_prior_info.csv', index=False)
+train_info.to_csv(utils.MODULE_PATH + '/prior/Smiles-LSTM_ChEMBL28_prior_info.csv', index=False)
 
 # Sample model
 logger.info('Sampling the unbiased model')
@@ -57,5 +54,5 @@ sample_prior['set'] = 'prior'
 
 # Save prior model and sample output
 logger.info('Saving the prior model and its sample output')
-torch.save(net.state_dict(), 'Smiles-LSTM_ChEMBL28_prior.pt')
-sample_prior.drop(columns=['ROMol']).to_csv('Smiles-LSTM_ChEMBL28_prior.csv')
+torch.save(net.state_dict(), utils.MODULE_PATH + '/prior/Smiles-LSTM_ChEMBL28_prior.pt')
+sample_prior.drop(columns=['ROMol']).to_csv(utils.MODULE_PATH + '/prior/Smiles-LSTM_ChEMBL28_prior.csv')

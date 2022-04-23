@@ -5,8 +5,7 @@ import numpy as np
 import torch
 from torch import nn
 
-import model
-import utils
+from SmilesLSTM.model import model, utils
 
 logger = utils.logger
 

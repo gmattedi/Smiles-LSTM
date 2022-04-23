@@ -1,8 +1,11 @@
 import logging
-from typing import Sequence
+import os
 
 import numpy as np
 from rdkit.Chem import Descriptors, rdMolDescriptors
+
+local_path = os.path.abspath(os.path.dirname(__file__))
+MODULE_PATH = os.path.join(local_path, '../')
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -44,7 +47,7 @@ def one_hot_encode(arr: np.ndarray, n_labels: int) -> np.ndarray:
         one_hot (np.array)
     """
 
-    # Initialize the the encoded array
+    # Initialize the encoded array
     one_hot = np.zeros((np.multiply(*arr.shape), n_labels), dtype=np.float32)
     # Fill the appropriate elements with ones
     one_hot[np.arange(one_hot.shape[0]), arr.flatten()] = 1.

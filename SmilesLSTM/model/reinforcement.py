@@ -50,8 +50,8 @@ class Reinforcement:
         self.avg_episode_length = 50  # 48.9
 
     def train(self, num_batches: int = 25, batch_size: int = 24, clip: Optional[float] = None, log_every: int = 1) -> \
-    Tuple[
-        List[float], List[float]]:
+            Tuple[
+                List[float], List[float]]:
         """
         Policy gradient optimisation
 
