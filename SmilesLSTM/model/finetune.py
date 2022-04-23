@@ -39,7 +39,6 @@ def finetune(
     # Sample model
     logger.info('Sampling the finetuned model')
     sample_ft = sample.get_sample_frame(net, size=size, prime='C')
-    sample_ft['set'] = 'finetune'
 
     # Save prior model and sample output
     logger.info('Saving the finetuned model and its sample output')

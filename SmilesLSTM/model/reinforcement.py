@@ -50,6 +50,7 @@ class Reinforcement:
 
     def train(self, num_batches: int = 25, batch_size: int = 24, clip: Optional[float] = None, log_every: int = 1) -> \
             Tuple[
+                model.CharRNN,
                 List[float], List[float]]:
         """
         Policy gradient optimisation
@@ -86,7 +87,7 @@ Elapsed: {timer_elapsed:8.1f}s
 """
                 utils.logger.info(msg)
 
-        return history_reward, history_loss
+        return self.net, history_reward, history_loss
 
     def gradient(self, batch_size: int, clip: Optional[float] = None) -> Tuple[float, float]:
         """
@@ -258,6 +259,9 @@ if __name__ == '__main__':
                         type=float)
     parser.add_argument('--clip', help='Gradient clip (default: None)', required=False,
                         default=None)
+    parser.add_argument('-s', '--size', help='Sample this many characters (default: %(default)d)', required=False,
+                        default=100000,
+                        type=int)
     parser.add_argument('-op', '--output_prefix', help='Prefix for output files', required=True, type=str)
     args = parser.parse_args()
 
@@ -278,8 +282,17 @@ if __name__ == '__main__':
     logger.info('Policy gradient')
     rl = Reinforcement(net=net, scorer=Reinforcement.logp_scorer, gamma=args.gamma, lr=args.learning_rate)
 
-    rl.train(
+    net, history_reward, history_loss = rl.train(
         num_batches=args.batches,
         batch_size=args.batch_size,
-        clip=clipZ
+        clip=clip
     )
+
+    # Sample model
+    logger.info('Sampling the biased model')
+    sample_ft = sample.get_sample_frame(net, size=args.size, prime='C')
+
+    # Save prior model and sample output
+    logger.info('Saving the biased model and its sample output')
+    torch.save(net.state_dict(), args.output_prefix + '.pt')
+    sample_ft.drop(columns=['ROMol']).to_csv(args.output_prefix + '.csv')
