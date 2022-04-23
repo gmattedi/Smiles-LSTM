@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     logger.info('Loading the model')
     net = model.CharRNN(utils.chars, n_hidden=args.hidden, n_layers=args.layers)
-    net.load_state_dict(torch.load(args.model, map_location=torch.device(device)))
+    net.load_state_dict(torch.load(args.params, map_location=torch.device(device)))
 
     logger.info('Loading and processing input data for finetuning')
     data = pd.read_csv(args.finetune_csv)
