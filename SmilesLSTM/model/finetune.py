@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     logger.info('Loading and processing input data for finetuning')
     data = pd.read_csv(args.finetune_csv)
-    smiles = data[args.smils_col].values
+    smiles = data[args.smiles_col].values
 
     finetune(
         net,
