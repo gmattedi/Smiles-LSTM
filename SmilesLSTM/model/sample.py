@@ -10,6 +10,8 @@ from SmilesLSTM.model import model, utils
 
 RDLogger.DisableLog('rdApp.*')
 
+logger = utils.logger
+
 
 def predict(
         net: model.CharRNN, char,
@@ -143,9 +145,9 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='Sample trained SmilesLSTM model')
-    parser.add_argument('-m', '--model', help='Trained model checkpoint (.pt file)', required=True)
-    parser.add_argument('--hidden', help='Hidden units (default: %(default)d)', required=False, default=56, type=int)
-    parser.add_argument('--layers', help='Layers (default: %(default)d)', required=False, default=2, type=int)
+    parser.add_argument('-p', '--params', help='Trained model parameters (.pt file)', required=True)
+    parser.add_argument('--hidden', help='Hidden units (default: %(default)d)', required=False, default=128, type=int)
+    parser.add_argument('--layers', help='Layers (default: %(default)d)', required=False, default=4, type=int)
     parser.add_argument('-s', '--size', help='Sample this many characters (default: %(default)d)', required=False,
                         default=100000,
                         type=int)
@@ -155,8 +157,10 @@ if __name__ == '__main__':
     train_on_gpu = torch.cuda.is_available()
     device = 'cuda' if train_on_gpu else 'cpu'
 
+    logger.info('Loading the model')
     net = model.CharRNN(utils.chars, n_hidden=args.hidden, n_layers=args.layers)
     net.load_state_dict(torch.load(args.model, map_location=torch.device(device)))
 
+    logger.info('Sampling')
     net_sample = get_sample_frame(net, size=args.size, verbose=False)
     net_sample.drop(columns=['ROMol']).to_csv(args.output, index=False)
