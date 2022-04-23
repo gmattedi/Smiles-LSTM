@@ -1,3 +1,4 @@
+import json
 import time
 from typing import Optional, List, Tuple, Callable
 
@@ -8,9 +9,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from torch import Tensor
 
-import model
-import sample
-import utils
+from SmilesLSTM.model import model, sample, utils
 
 
 def sigmoid(x, x0: float = 0., b: float = 1.):
@@ -231,3 +230,56 @@ Elapsed: {timer_elapsed:8.1f}s
         val = Descriptors.MolLogP(mol)
         val = scale * sigmoid(val, sigmoid_x0, sigmoid_b)
         return val
+
+
+if __name__ == '__main__':
+    import argparse
+
+    with open(utils.MODULE_PATH + '/net_config.json') as handle:
+        config = json.load(handle)
+
+    parser = argparse.ArgumentParser(description='Policy Gradient with LogP goal')
+    parser.add_argument('-p', '--params', help='Trained model parameters (.pt file)', required=True)
+    parser.add_argument('--hidden', help='Hidden units (default: %(default)d)', required=False,
+                        default=config['n_hidden'], type=int)
+    parser.add_argument('--layers', help='Layers (default: %(default)d)', required=False, default=config['n_layers'],
+                        type=int)
+    parser.add_argument('--batches', help='Number of batches (default: %(default)d)', required=False,
+                        default=25,
+                        type=int)
+    parser.add_argument('--batch_size', help='Batch size (default: %(default)d)', required=False,
+                        default=24,
+                        type=int)
+    parser.add_argument('-lr', '--learning_rate', help='Learning rate (default: %(default)f)', required=False,
+                        default=0.001,
+                        type=float)
+    parser.add_argument('-g', '--gamma', help='Discount factor (default: %(default)f)', required=False,
+                        default=0.97,
+                        type=float)
+    parser.add_argument('--clip', help='Gradient clip (default: None)', required=False,
+                        default=None)
+    parser.add_argument('-op', '--output_prefix', help='Prefix for output files', required=True, type=str)
+    args = parser.parse_args()
+
+    if args.clip is not None:
+        clip = float(args.clip)
+    else:
+        clip = None
+
+    logger = utils.logger
+
+    train_on_gpu = torch.cuda.is_available()
+    device = 'cuda' if train_on_gpu else 'cpu'
+
+    logger.info('Loading the model')
+    net = model.CharRNN(utils.chars, n_hidden=args.hidden, n_layers=args.layers)
+    net.load_state_dict(torch.load(args.params, map_location=torch.device(device)))
+
+    logger.info('Policy gradient')
+    rl = Reinforcement(net=net, scorer=Reinforcement.logp_scorer, gamma=args.gamma, lr=args.learning_rate)
+
+    rl.train(
+        num_batches=args.batches,
+        batch_size=args.batch_size,
+        clip=clipZ
+    )

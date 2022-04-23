@@ -13,4 +13,18 @@ associated [Medium post](https://medium.com/@sunitachoudhary103/generating-molec
 this [blog post](https://www.cheminformania.com/master-your-molecule-generator-seq2seq-rnn-models-with-smiles-in-keras/)
 by Esben Jannik Bjerrum and the [ReLeaSE](https://www.science.org/doi/10.1126/sciadv.aap7885) algorihm by Popova et al.
 
-**WORK IN PROGRESS**
+# 1. Train the prior model
+```console
+cd SmilesLSTM/prior
+python train_prior.py
+```
+
+# 2. Finetune the prior model
+Finetune the model onto a ChEMBL dump of compounds tested against A2aR
+```console
+python model/finetune.py \
+  -p SmilesLSTM/prior/Smiles-LSTM_ChEMBL28_prior.pt \
+  -f SmilesLSTM/input/ChEMBL_ADORA2a_IC50-Ki.csv.gz \
+  -op finetuned \
+  --smiles_col Smiles
+```

@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('-lr', '--learning_rate', help='Learning rate (default: %(default)f)', required=False,
                         default=config['lr'],
                         type=float)
-    parser.add_argument('-f', '--finetune_csv', help='CSV-like file of SMILES strings for finetuning', required=True,
+    parser.add_argument('-f', '--finetune_csv', help='CSV/CSV.GZ file of SMILES strings for finetuning', required=True,
                         type=str)
     parser.add_argument('--smiles_col', help='SMILES column (default: $(default)s)', required=False, type=str,
                         default='SMILES')
@@ -101,5 +101,5 @@ if __name__ == '__main__':
         batch_size=args.batch_size,
         seq_length=args.seq_length,
         size=args.size,
-        lr=args.lr
+        lr=args.learning_rate
     )
